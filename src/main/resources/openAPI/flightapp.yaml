@@ -1,0 +1,550 @@
+openapi: 3.0.3
+info:
+  description: >-
+    Flight Application
+  title: Flight Application
+  version: 1.0.0
+tags:
+  - name: Airlines
+    description: >-
+      Create new Airlines
+  - name: Flights
+    description: Flight details
+  - name: User
+    description: >-
+      Details about user
+paths:
+  /airlines:
+    post:
+      tags:
+        - Airlines
+      summary: Add new Airlines
+      description: >-
+        Use this API to add new airlines.<br/>
+        Required roles: _flight-admin_
+      operationId: addFlights
+      requestBody:
+        $ref: '#/components/requestBodies/Flight'
+      responses:
+        '200':
+          $ref: '#/components/responses/Flight'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+  /flights/search:
+    post:
+      tags:
+        - Flights
+      summary: Search for Flights
+      description: >-
+        Use this API to search flights.<br/>
+        Required roles: _flight-basic_
+      operationId: getFlightsDetail
+      requestBody:
+        $ref: '#/components/requestBodies/FlightsSearchByOptions'
+      responses:
+        '200':
+          $ref: '#/components/responses/Flights'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+  /flights/booking/{flight_id}:
+    post:
+      tags:
+        - Flights
+      summary: Book a Flight
+      description: >-
+        Use this API to Book a flight.<br/>
+        Required roles: _flight-basic_, _flight-admin_
+      operationId: addFlightBooking
+      parameters:
+        - $ref: '#/components/parameters/FlightId'
+      requestBody:
+        $ref: '#/components/requestBodies/FlightBooking'
+      responses:
+        '200':
+          $ref: '#/components/responses/FlightBooking'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /flights/cancel/{pnr}:
+    delete:
+      tags:
+        - Flights
+      summary: Delete a Flight booking
+      description: >-
+        Use this API to delete a flight booking by pnr.<br/>
+        Required roles: _flight-basic_
+      operationId: cancelBooking
+      parameters:
+        - $ref: '#/components/parameters/PNR'
+      responses:
+        '204':
+          description: The booking was successfully cancelled.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /flights/tickets/{pnr}:
+    get:
+      tags:
+        - Flights
+      summary: Retrieve a flight booking
+      description: >-
+        Use this API to retrieve a flight booking by PNR.<br/>
+        Required roles: _flight-basic_
+      operationId: getFlightTicketByPNR
+      parameters:
+        - $ref: '#/components/parameters/PNR'
+      responses:
+        '200':
+          $ref: '#/components/responses/FlightTicket'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+  /flights/tickets/{email_id}:
+    get:
+      tags:
+        - Flights
+      summary: Retrieve a flight booking
+      description: >-
+        Use this API to retrieve a flight booking by EMAIL ID.<br/>
+        Required roles: _flight-basic_
+      operationId: getFlightTicketByEmail
+      parameters:
+        - $ref: '#/components/parameters/EmailId'
+      responses:
+        '200':
+          $ref: '#/components/responses/FlightTicket'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+components:
+  parameters:
+    FlightId:
+      in: path
+      name: flight_id
+      example: 1
+      schema:
+        type: integer
+        format: int64
+      required: true
+      description: A number which uniquely identifies a Flight resource
+    PNR:
+      in: path
+      name: pnr
+      example: 'XACV'
+      schema:
+        type: string
+        format: ^[a-zA-Z]+$
+        description: PNR of the flight
+        example: 'XACV'
+      required: true
+      description: A string which uniquely identifies a flight booking.
+    EmailId:
+      in: path
+      name: email_id
+      example: example@gmail.com
+      schema:
+        type: string
+        format: ^[a-zA-Z\\.\\@]+$
+        description: Email Id of the user
+        example: 'example@gmail.com'
+      required: true
+      description: A number which uniquely identifies a Region
+  schemas:
+    Flight:
+      type: object
+      required:
+        - flightId
+        - meal
+        - price
+        - flightCompany
+        - startDestination
+        - endDestination
+        - startDate
+        - endDate
+        - isBlocked
+      properties:
+        flightId:
+          type: integer
+          format: int64
+          readOnly: true
+          example: 1
+          description: A unique identifier for Flight.
+        meal:
+          $ref: '#/components/schemas/Meal'
+        price:
+          type: integer
+          format: int64
+          example: 1234
+          description: price for the flight.
+        flightCompany:
+          type: string
+          enum:
+            - 'EMIRATES'
+            - 'AIRASIA'
+            - 'INDIGO'
+          description: The given Flight Company
+          example: 'EMIRATES'
+        startDestination:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: Start destination of flight
+          example: 'LONDON'
+        endDestination:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: End destination of flight
+          example: 'BARCELONA'
+        startTime:
+          type: string
+          format: date-time
+          example: '2021-01-30T08:30:00Z'
+          description: The date-time the trip will start.
+        endTime:
+          type: string
+          format: date-time
+          example: '2021-01-30T08:30:00Z'
+          description: The date-time the trip will end.
+        flightModel:
+          type: string
+          format: ^[a-zA-Z0-9\\-]+$
+          description: Start destination of flight
+          example: 'A-360'
+        isBlocked:
+          type: boolean
+          example: false
+          description: True if Airline is blocked
+    Flights:
+      type: object
+      properties:
+        flights:
+          type: array
+          description: A list of Avaiable flights.
+          items:
+            $ref: '#/components/schemas/Flight'
+    Meal:
+      type: object
+      properties:
+        nonvegmeal:
+          type: string
+          format: ^[a-zA-Z0-9]+$
+          example: Biryani
+          description: A non veg meal for flight.
+        vegmeal:
+          type: string
+          format: ^[a-zA-Z0-9]+$
+          example: Manchurian
+          description: A non veg meal for flight.
+    FlightsSearchByOptions:
+      type: object
+      properties:
+        startDestination:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: Start destination of flight
+          example: 'LONDON'
+        endDestination:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: End destination of flight
+          example: 'BARCELONA'
+        fromDate:
+          type: string
+          format: date
+          example: '2019-04-21'
+          description: The date the trip will start.
+        toDate:
+          type: string
+          format: date
+          example: '2019-04-21'
+          description: The date the trip will end.
+    PNR:
+      type: string
+      format: ^[a-zA-Z]+$
+      description: PNR of the flight
+      example: 'XACV'
+    Passenger:
+      type: object
+      properties:
+        name:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: Name of the passenger
+          example: 'SNEHA'
+        gender:
+          type: string
+          enum:
+            - 'MALE'
+            - 'FEMALE'
+            - 'OTHER'
+          description: Gender of passenger
+        age:
+          type: integer
+          format: int32
+          example: 29
+          description: Age of passenger
+    FlightBooking:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date-time
+          example: '2021-01-30T08:30:00Z'
+          description: The date-time the trip will start.
+        startDestination:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: Start destination of flight
+          example: 'LONDON'
+        endDestination:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: End destination of flight
+          example: 'BARCELONA'
+        name:
+          type: string
+          format: ^[a-zA-Z\s\\(\\),\\.]+$
+          description: Start destination of flight
+          example: 'LONDON'
+        email:
+          type: string
+          format: ^[a-zA-Z\\.\\@]+$
+          description: Email Id of the user
+          example: 'example@gmail.com'
+        seats:
+          type: integer
+          format: int64
+          example: 1234
+          description: number of seats
+        passengers:
+          type: array
+          description: 'Passenger Details'
+          items:
+            type: object
+            properties:
+              passenger:
+                $ref: '#/components/schemas/Passenger'
+              isNonVegMeal:
+                type: boolean
+                example: true
+                description: Passenger meal.
+    FlightTicket:
+      type: object
+      properties:
+        pnr:
+          $ref: '#/components/schemas/PNR'
+        flightBooking:
+          $ref: '#/components/schemas/FlightBooking'
+        createdAt:
+          type: string
+          format: date-time
+          example: '2021-01-30T08:30:00Z'
+          description: The date-time the trip will start.
+        updatedAt:
+          type: string
+          format: date-time
+          example: '2021-01-30T08:30:00Z'
+          description: The date-time the trip will end.
+    Error:
+      type: object
+      required:
+        - "Errors"
+      properties:
+        Errors:
+          type: object
+          required:
+            - "Error"
+          properties:
+            Error:
+              type: array
+              description: 'Only returned in the event of an error condition.'
+              items:
+                type: object
+                properties:
+                  Source:
+                    type: string
+                    description: 'An element used to indicate the source of the issue causing this error.'
+                  ReasonCode:
+                    type: string
+                    description: 'A reason code for the error that has occurred.'
+                  Description:
+                    type: string
+                    description: 'Description of the reason the operation failed.'
+                  Recoverable:
+                    type: boolean
+                    description: 'Generated by the gateway to indicate if the request could presented again for processing. Either "true" or "false".'
+                  Details:
+                    type: string
+                    description: 'Identifies the description of the error.'
+  requestBodies:
+    Flight:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Flight'
+    FlightsSearchByOptions:
+      required: false
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FlightsSearchByOptions'
+    FlightTicket:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FlightTicket'
+    FlightBooking:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FlightBooking'
+  responses:
+    Flight:
+      description: Flight was successfully added.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Flight'
+    Flights:
+      description: Available Flights.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Flights'
+    FlightBooking:
+      description: Flight Booking Details
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FlightBooking'
+    FlightTicket:
+      description: Flight Ticket Details.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FlightTicket'
+    NotFoundError:
+      description: URI didn't match an existing resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            NotFoundExample:
+              $ref: '#/components/examples/NotFoundExample'
+    BadRequestError:
+      description: Something was wrong with the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            BadRequestExample:
+              $ref: '#/components/examples/BadRequestExample'
+    UnauthorizedError:
+      description: Authentication information was missing or invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            UnauthorizedExample:
+              $ref: '#/components/examples/UnauthorizedExample'
+    ForbiddenError:
+      description: Insufficient permissions for interacting with the resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ForbiddenExample'
+    ConflictError:
+      description: A conflict happened when creating or updating the resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          examples:
+            ForbiddenExample:
+              $ref: '#/components/examples/ConflictExample'
+  examples:
+    UnauthorizedExample:
+      value:
+        Errors:
+        Error:
+          - Source: PRICELESS_PLANET
+            ReasonCode: UNAUTHORIZED
+            Description: "We couldn't recognize you"
+            Recoverable: false
+            Details: "Full authentication is required to access this resource"
+    BadRequestExample:
+      value:
+        Errors:
+        Error:
+          - Source: PRICELESS_PLANET
+            ReasonCode: BAD_REQUEST
+            Description: "We couldn't handle your request"
+            Recoverable: false
+            Details: "deleteUser.username: must match \"^[a-z0-9\\-]{2,100}$\""
+    NotFoundExample:
+      value:
+        Errors:
+        Error:
+          - Source: PRICELESS_PLANET
+            ReasonCode: NOT_FOUND
+            Description: "You requested something we don't have"
+            Recoverable: false
+            Details: "User 'jackson' doesn't exist"
+    ForbiddenExample:
+      value:
+        Errors:
+        Error:
+          - Source: PRICELESS_PLANET
+            ReasonCode: PERMISSION_DENIED
+            Description: "You don't seem authorized to do that"
+            Recoverable: false
+            Details: "Reading users other than 'me' requires additional permissions"
+    ConflictExample:
+      value:
+        Errors:
+        Error:
+          - Source: PRICELESS_PLANET
+            ReasonCode: CONFLICT
+            Description: "Something already exists on our side"
+            Recoverable: true
+            Details: "'user@mastercard.com' is already taken"

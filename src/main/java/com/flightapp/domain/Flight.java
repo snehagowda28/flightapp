@@ -1,13 +1,21 @@
 package com.flightapp.domain;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.List;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -16,22 +24,23 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode
+@Builder
 public class Flight {
 
     @Id
     @Column(name = "FLIGHT_ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private int flightId;
+    private Long flightId;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "MEAL_ID", referencedColumnName = "MEAL_ID")
-    private Meal mealId;
+    @JoinColumn(name = "MEAL_ID", nullable = true)
+    private Meal meal;
 
     @Column
     private Long price;
 
     @Column
-    private FlightCompany flightCompany;
+    private com.flightapp.openapi.dto.Flight.FlightCompanyEnum flightCompany;
 
     @Column
     private String flightModel;
@@ -43,10 +52,10 @@ public class Flight {
     private String endDestination;
 
     @Column
-    private LocalDate startTime;
+    private LocalDateTime startTime;
 
     @Column
-    private LocalDate endTime;
+    private LocalDateTime endTime;
 
     @Column
     private boolean isBlocked;

@@ -1,4 +1,20 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, beans, metrics
+  endpoint:
+    health:
+      show-details: never
+
+logging:
+  level:
+    web: INFO
+    com.flightapp: DEBUG
+
 spring:
+  application:
+    name: flightapp
   h2:
     console:
       enabled: true
@@ -13,3 +29,11 @@ spring:
     generate-dll: true
     hibernate:
       ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true

@@ -5,18 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.List;
 
 @Entity
 @Table
@@ -25,20 +22,29 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode
 @Builder
-public class Meal {
+public class Passenger {
     @Id
-    @Column(name = "MEAL_ID")
+    @Column(name = "PASSENGER_ID")
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long mealId;
+    private Long passengerId;
+
+    @ManyToOne
+    @JoinColumn(name = "PNR")
+    private FlightBooking flightBooking;
+
+//    @ManyToOne
+//    @JoinColumn(name = "MEAL_ID")
+//    private Meal meal;
 
     @Column
-    private String vegMeal;
+    private boolean isNonVegMeal;
 
     @Column
-    private String nonVegMeal;
+    private String passengerName;
 
-//    @Column
-//    @ToString.Exclude
-//    @OneToMany(mappedBy = "meal", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Passenger> passengers;
+    @Column
+    private com.flightapp.openapi.dto.Passenger.GenderEnum gender;
+
+    @Column
+    private Integer age;
 }
