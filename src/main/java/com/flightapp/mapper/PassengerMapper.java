@@ -1,7 +1,6 @@
 package com.flightapp.mapper;
 
 
-import com.flightapp.openapi.dto.Flight;
 import com.flightapp.openapi.dto.FlightBooking;
 import com.flightapp.openapi.dto.FlightBookingPassengers;
 import com.flightapp.openapi.dto.Passenger;

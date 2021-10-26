@@ -1,24 +1,9 @@
 package com.flightapp.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.flightapp.openapi.dto.FlightBookingPassengers;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,8 +21,18 @@ public class FlightBooking {
     private Long id;
 
     @Column(name = "PNR")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private String pnr;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "FLIGHT_ID", nullable = false)
+    private Flight flight;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "FLIGHT_ID", nullable = false)
+    private List<Passenger> passengers;
+
+//    @OneToMany(mappedBy = "flightBooking", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Passenger> passengers = new ArrayList<>();
 
     @Column
     private LocalDateTime date;
@@ -56,11 +51,6 @@ public class FlightBooking {
 
     @Column
     private Long seats;
-
-    @Column
-    @ToString.Exclude
-    @OneToMany(mappedBy = "flightBooking", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Passenger> passengers;
 
     @Column
     @JsonIgnore
